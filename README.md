@@ -81,4 +81,10 @@ Libraries and Extensions used
 ***mysqli*** - Used for setting up a database connection from PHP to MySQL. [mysqli](http://php.net/manual/en/book.mysqli.php)
 ###Frontend
 ***Bootstrap*** - For frontend layouts. [Bootstrap](http://getbootstrap.com/getting-started/)   
-***Charts.js*** - For the bar graph. 
+***Charts.js*** - For the bar graph. [Charts.js](http://www.chartjs.org/docs/)   
+
+Screenshots
+-----------
+![Main Page](https://github.com/sriku97/currency_manager/blob/master/mainpage.png)   
+![Converter](https://github.com/sriku97/currency_manager/blob/master/converterpage.png)   
+![Graph](https://github.com/sriku97/currency_manager/blob/master/graphpage.png)
