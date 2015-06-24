@@ -27,7 +27,7 @@ h1
 }
 #maintext
 {
-	font-size: 160%;
+	font-size: 180%;
 	color: floralwhite;
 }
 ul
@@ -124,7 +124,7 @@ li:hover
         </div>
         <div class="col-lg-8"> 
             <div id="maintext">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur condimentum vestibulum ex, et luctus velit rutrum vitae. Maecenas quis sem hendrerit, vulputate metus egestas, ultrices tortor. Maecenas consectetur ligula sit amet mauris scelerisque aliquet. Maecenas vehicula id ligula imperdiet consequat. Praesent venenatis ultricies nisl sit amet scelerisque. Donec vitae ligula magna. Sed quis fringilla nisi. Proin pulvinar orci in luctus malesuada. Cras volutpat ipsum vel velit pretium, id tempus enim hendrerit. Quisque nec ex eleifend, maximus mauris vel, rhoncus diam. Sed dignissim leo ut nisi suscipit, non pretium orci feugiat. Sed pellentesque pharetra tincidunt. Integer dictum metus et sapien condimentum rutrum.
+                This website is a project that includes various functionalities based on the latest exchange rates obtained from an online API service. This website runs fully on a GUI and no API calls need to explicitly be made by the user. It includes a currency conversion application that converts one currency to another based on the amount the user has entered. There is also a graph application that shows the relative values of currencies with respect to eachother. The user can choose the currencies to be added to the graph and the scale of the graph resizes accoring to the currencies chosen.
             </div>
         </div>
     </div>
