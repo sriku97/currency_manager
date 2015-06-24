@@ -10,16 +10,19 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script>
-function conv(value) //sends ajax request to a laravel route with one parameter
+function conv(code) 
 {
-	var xmlhttp=new XMLHttpRequest();
+	/*An ajax request is sent to the processing file through a laravel route with 
+    the input as a parameter and the resultant value is displayed in a div*/
+    var xmlhttp=new XMLHttpRequest();
 	xmlhttp.onreadystatechange= function() {
-		if(xmlhttp.readyState==4&&xmlhttp.status==200)
+		if(xmlhttp.readyState==4&&xmlhttp.status==200) 
 		{
-			document.getElementById("result").innerHTML=xmlhttp.responseText;
+			//insert response into the result div if request is finished and response is ready
+            document.getElementById("result").innerHTML=xmlhttp.responseText; 
 		}
 	}
-	xmlhttp.open("GET","checkcurrentrate/"+value,true);
+	xmlhttp.open("GET","checkcurrentrate/"+code,true); //sends ajax request to a laravel route with one parameter
 	xmlhttp.send();
 }
 </script>
@@ -31,6 +34,10 @@ a,a:hover
 {
 	color:#2C3539;
 }
+h2
+{
+    text-align: center;
+}
 </style>
 
 </head>
@@ -38,8 +45,20 @@ a,a:hover
 <body background="background.jpg">
 
 <?php
+    /*First, a database connection is setup, and the necessary database and tables are created if they
+    don't exist. The table apidata is used to store the values obtained from the API and timestore is 
+    used to store the time at which the database is updated.
+
+    If no entry exists in the timestore table, the current time is inserted. The variable prev_time 
+    gets the time at which the database was last updated as the number of seconds passed since 00:00:00 
+    and the current time is also obtained in a similar way. 
+
+    Then if the conditions to check for fresh data are true, the previous timestamp is deleted from timestore
+    and the present time is added. Then the data from the API is obtained in JSON format and the necessary 
+    data is extracted and stored in the table apidata after clearing it.*/
+
     //setup database connection and create necessary database and tables
-    $conn=new mysqli("localhost","root","");
+    $conn=new mysqli("localhost","root",""); //if mysql is already installed use your own credentials
     $conn->query("CREATE DATABASE spider");
     $conn->query("USE spider");
     $conn->query("CREATE TABLE apidata(currkey char(6), currvalue float(10))");
@@ -54,12 +73,9 @@ a,a:hover
     $prev_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC('".$t[0]."')"));
     $cur_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC(now())"));
 
-    //to prevent errors when a call is made af 00:00:00
-    if($prev_time[0]>82800)
-        $cur_time+=86400;
 
     //if time difference is more than one hour or if it is the first entry, get new data and store
-    if(($cur_time[0]-$prev_time[0])>3600||($cur_time[0]-$prev_time[0])==0)
+    if(($cur_time[0]-$prev_time[0])>3600||($cur_time[0]-$prev_time[0])==0||$cur_time[0]<$prev_time[0])
     {
         $conn->query("DELETE FROM timestore"); //delete previous timestamp
         $conn->query("INSERT INTO timestore VALUES(now())"); //and replace with new one
@@ -88,7 +104,7 @@ a,a:hover
             	<select name='currencies' class="form-control" id="sel1" onchange="conv(this.value)">
             	    <?php echo file_get_contents("select.txt"); ?>
             	</select>
-                    <br><br>
+                <br><br>
             </div>
         </div>
         <div class="col-lg-8">    
@@ -99,7 +115,7 @@ a,a:hover
 	</div>
     <div class="row">
     	<div class="col-lg-12">
-        <h1 style="text-align:center"><a href="current_rates/table" target="_BLANK">Click here to view the names of the currencies corresponding to each code</a></h1>
+        <h1 style="text-align:center"><a href="table" target="_BLANK">Click here to view the names of the currencies corresponding to each code</a></h1>
         </div>
     </div>
 </div>

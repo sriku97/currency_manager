@@ -31,11 +31,7 @@ Route::get('graph',function() {
     return view('graph');
 });
 
-Route::get('current_rates/table',function(){
-    return view('table');
-});
-
-Route::get('converter/table',function(){
+Route::get('table',function(){
     return view('table');
 });
 
@@ -44,9 +40,15 @@ Route::get('checkcurrentrate/{code}',function($code){ //route called through an 
     return View::make('checkcurrentrate',$data);
 });
 
-Route::get('convertvalue/{cur1}/{cur2}/{val}',function($cur1,$cur2,$val){ //route called through an ajax request
+Route::get('convertvalue/{cur1}/{cur2}/{input}',function($cur1,$cur2,$input){ //route called through an ajax request
     $data['cur1']=$cur1;
     $data['cur2']=$cur2;
-    $data['val']=$val;
+    $data['input']=$input;
     return View::make('convertvalue',$data);
+});
+
+Route::get('drawgraph/{curr}/{bardata}',function($curr,$bardata){ //route called through an ajax request
+    $data['curr']=$curr;
+    $data['bardata']=$bardata;
+    return View::make('drawgraph',$data);
 });

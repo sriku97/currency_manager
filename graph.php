@@ -1,22 +1,177 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script src="Chart.js"></script>
+
+<script>
+function add()
+{
+    /*The data required to draw the graph is in JSON format. Since an object can't be
+    sent directly it is sent as a string and decoded at the processing file. New values 
+    are inserted based on user input which is sent as another parameter and the new data
+    is obtained and assigned to the required variable. The canvas is then refreshed to
+    display the new graph*/
+    var xmlhttp=new XMLHttpRequest();
+    xmlhttp.onreadystatechange= function() {
+        if(xmlhttp.readyState==4&&xmlhttp.status==200)
+        {
+            //resultant data is a string and is parsed and assigned to the bardata variable
+            bardata=JSON.parse(xmlhttp.responseText);
+            makeChart(); //canvas refresh
+        }
+    }
+    var curr=document.getElementById("sel1").value;
+    xmlhttp.open("GET","drawgraph/"+curr+"/"+JSON.stringify(bardata),true); //sends ajax request to a laravel route with three parameters
+    xmlhttp.send();
+}
+</script>
+
 <title>Spider Web Dev Task 2</title>
+
+<style>
+h2
+{
+	text-align: center;
+}
+#addgraph
+{
+	width:200px;
+	height:50px;
+	line-height: 50px;
+	margin:auto;
+	background-color: gray;
+	font-size: 200%;
+	border: 2px solid black;
+	border-radius: 10px;
+	display: table;
+	text-align: center;
+	font-family: impact;
+	color: black;
+	box-shadow: 5px 5px 5px black;
+}
+#addgraph:hover
+{
+	cursor: pointer;
+}
+#addgraph:active
+{
+	width: 190px;
+	height: 45px;
+	line-height: 45px;
+	vertical-align: top;
+    box-shadow: none;
+}
+a,a:hover
+{
+	color:#2C3539;
+}
+</style>
 
 </head>
 
 <body background="background.jpg">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tempor congue risus non auctor. Nullam ac lorem turpis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin quam dolor, aliquet vitae vulputate sit amet, faucibus eu quam. Praesent pulvinar mauris in nulla blandit, nec hendrerit ligula congue. Maecenas a faucibus urna, aliquam ullamcorper magna. Ut pharetra consequat mauris, eget tempor quam consequat sed. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Duis vitae faucibus felis. Donec purus quam, blandit at gravida quis, euismod ut augue. Nullam vel mauris erat. Morbi suscipit euismod nibh, ut consequat felis rutrum sit amet. Curabitur et eros vel urna facilisis tristique eu a justo. Nulla in dapibus elit, id rutrum neque.
 
-Duis id laoreet lacus. Maecenas commodo diam non arcu cursus fringilla. Aliquam at dapibus massa, suscipit condimentum arcu. Sed interdum leo in dolor venenatis, a tempus diam maximus. Nulla semper elementum mi, vel sagittis nibh luctus sed. Nunc vitae nibh fringilla massa pellentesque bibendum vitae ut urna. Praesent bibendum sit amet eros commodo feugiat. Donec mi nisl, hendrerit sit amet tortor sed, rutrum scelerisque velit. Quisque ut ante porttitor, facilisis quam in, ullamcorper metus.
+<?php
+    /*First, a database connection is setup, and the necessary database and tables are created if they
+    don't exist. The table apidata is used to store the values obtained from the API and timestore is 
+    used to store the time at which the database is updated.
 
-Mauris rhoncus est sed sem fermentum, nec ultricies metus maximus. Fusce mi nunc, luctus in dignissim in, suscipit vel purus. Nam ullamcorper massa a velit sodales ultricies. Duis non turpis eleifend, varius orci hendrerit, rhoncus mi. Mauris placerat orci a lobortis dictum. Nullam rutrum sem sed odio tempor, vitae consequat ipsum gravida. Duis sed dolor semper, maximus sapien sed, lobortis ex. Donec varius pharetra ligula, consequat feugiat nisl porttitor at. Cras eu risus nec nibh gravida pellentesque. Maecenas venenatis purus pellentesque, vestibulum velit vel, pretium purus. Morbi fermentum iaculis orci quis tincidunt. Duis ac hendrerit felis. Curabitur volutpat lacinia tincidunt. Suspendisse lobortis eros vitae maximus fringilla.
+    If no entry exists in the timestore table, the current time is inserted. The variable prev_time 
+    gets the time at which the database was last updated as the number of seconds passed since 00:00:00 
+    and the current time is also obtained in a similar way. 
 
-Aliquam nibh velit, pulvinar et lacus a, hendrerit semper diam. Praesent vulputate iaculis congue. In non sapien tristique, scelerisque dolor ut, pulvinar risus. Integer interdum bibendum nulla nec convallis. Pellentesque mollis pretium tellus, ut hendrerit enim egestas sed. Praesent et mattis est. Aenean et eros at quam porttitor pellentesque eu ultricies augue.
+    Then if the conditions to check for fresh data are true, the previous timestamp is deleted from timestore
+    and the present time is added. Then the data from the API is obtained in JSON format and the necessary 
+    data is extracted and stored in the table apidata after clearing it.*/
 
-Donec a enim ipsum. Etiam a viverra felis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin nibh ante, imperdiet nec felis quis, rhoncus sodales nisi. Quisque at nunc ligula. Quisque sed urna sed erat semper dignissim. Proin augue mauris, mattis facilisis nisi eget, dictum hendrerit enim. Etiam pellentesque metus nec vulputate lacinia. Etiam ornare elit quis dui mollis tincidunt. Ut commodo convallis faucibus. Aliquam accumsan ipsum tempus ipsum maximus, ac condimentum arcu vestibulum.
+    //setup database connection and create necessary database and tables
+    $conn=new mysqli("localhost","root",""); //if mysql is already installed use your own credentials
+    $conn->query("CREATE DATABASE spider");
+    $conn->query("USE spider");
+    $conn->query("CREATE TABLE apidata(currkey char(6), currvalue float(10))");
+    $conn->query("CREATE TABLE timestore(entrytime time)");
+
+    //enter the current time into the database if no entry exists
+    if(!(mysqli_fetch_array($conn->query("SELECT * FROM timestore"))))
+        $conn->query("INSERT INTO timestore VALUES(now())");
+
+    //get time when database was updated last
+    $t=mysqli_fetch_array($conn->query("SELECT * FROM timestore"));
+    $prev_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC('".$t[0]."')"));
+    $cur_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC(now())"));
+
+
+    //if time difference is more than one hour or if it is the first entry, get new data and store
+    if(($cur_time[0]-$prev_time[0])>3600||($cur_time[0]-$prev_time[0])==0||$cur_time[0]<$prev_time[0])
+    {
+        $conn->query("DELETE FROM timestore"); //delete previous timestamp
+        $conn->query("INSERT INTO timestore VALUES(now())"); //and replace with new one
+        $data=file_get_contents("http://apilayer.net/api/live?access_key=1de7091150621fc633cca0a72bd6d0e1&format=1");
+        $result=json_decode($data,true);
+        $values=$result['quotes'];
+        $conn->query("DELETE FROM apidata"); //for new incoming data
+        foreach($values as $key=>$entry)
+        {
+            $conn->query("INSERT INTO apidata VALUES('".$key."',".$entry.")");
+        }
+    }
+    $conn->close();
+?>
+
+<div class="container-fluid">
+    <div class="row">
+    	<div class="jumbotron">
+    		<h2>Select the currency you want to add to the graph and click Add!</h2>
+    	</div>
+    </div>
+    <div class="row">
+    	<canvas id="graph" width="500" height="300"></canvas>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+        	<div class="form-group">
+        		<select name='currencies' class="form-control" id="sel1">
+            	    <?php echo file_get_contents("select.txt"); ?>
+            	</select>
+        	</div>
+        </div>
+        <div class="col-lg-4">
+        	<div id="addgraph" onclick="add()">ADD</div>
+        </div>
+    </div>
+    <div class="row">
+    	<div class="col-lg-12">
+        <h1 style="text-align:center"><a href="table" target="_BLANK">Click here to view the names of the currencies corresponding to each code</a></h1>
+        </div>
+    </div>
+</div>
+
+<script>
+function makeChart()
+{
+    new Chart(ctx).Bar(bardata); //creates a new chart using charts.js
+}
+var bardata = {
+	labels : [],
+	datasets : [
+	    {
+		    fillColor : "rgba(0,0,255,0.4)",
+		    data : []
+	    }
+	]
+}
+var ctx=document.getElementById("graph").getContext("2d");
+makeChart();
+</script>
+
 </body>
 
 </html>

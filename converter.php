@@ -19,19 +19,23 @@ function numbercheck(e) //only numbers are allowed as input
       e.preventDefault();
     }
 }
-function convert() //sends ajax request to a laravel route with three parameters
+function convert()
 {
+    /*An ajax request is sent to the processing file through a laravel route and the 
+    user inputs are sent as parameters. The calculations are made and the result is 
+    returned and displayed in a div*/
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange= function() {
         if(xmlhttp.readyState==4&&xmlhttp.status==200)
         {
+            //insert response into the result div if request is finished and response is ready            
             document.getElementById("result").innerHTML=xmlhttp.responseText;
         }
     }
     var cur1=document.getElementById("sel1").value;
     var cur2=document.getElementById("sel2").value;
-    var val=document.getElementById("input").value;
-    xmlhttp.open("GET","convertvalue/"+cur1+"/"+cur2+"/"+val,true);
+    var input=document.getElementById("input").value;
+    xmlhttp.open("GET","convertvalue/"+cur1+"/"+cur2+"/"+input,true); //sends ajax request to a laravel route with three parameters
     xmlhttp.send();
 }
 </script>
@@ -83,8 +87,20 @@ label
 <body background="background.jpg">
 
 <?php
+    /*First, a database connection is setup, and the necessary database and tables are created if they
+    don't exist. The table apidata is used to store the values obtained from the API and timestore is 
+    used to store the time at which the database is updated.
+
+    If no entry exists in the timestore table, the current time is inserted. The variable prev_time 
+    gets the time at which the database was last updated as the number of seconds passed since 00:00:00 
+    and the current time is also obtained in a similar way. 
+
+    Then if the conditions to check for fresh data are true, the previous timestamp is deleted from timestore
+    and the present time is added. Then the data from the API is obtained in JSON format and the necessary 
+    data is extracted and stored in the table apidata after clearing it.*/
+
     //setup database connection and create necessary database and tables
-    $conn=new mysqli("localhost","root","");
+    $conn=new mysqli("localhost","root",""); //if mysql is already installed use your own credentials
     $conn->query("CREATE DATABASE spider");
     $conn->query("USE spider");
     $conn->query("CREATE TABLE apidata(currkey char(6), currvalue float(10))");
@@ -99,12 +115,9 @@ label
     $prev_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC('".$t[0]."')"));
     $cur_time=mysqli_fetch_array($conn->query("SELECT TIME_TO_SEC(now())"));
 
-    //to prevent errors when a call is made af 00:00:00
-    if($prev_time[0]>82800)
-        $cur_time+=86400;
 
     //if time difference is more than one hour or if it is the first entry, get new data and store
-    if(($cur_time[0]-$prev_time[0])>3600||($cur_time[0]-$prev_time[0])==0)
+    if(($cur_time[0]-$prev_time[0])>3600||($cur_time[0]-$prev_time[0])==0||$cur_time[0]<$prev_time[0])
     {
         $conn->query("DELETE FROM timestore"); //delete previous timestamp
         $conn->query("INSERT INTO timestore VALUES(now())"); //and replace with new one
@@ -168,7 +181,7 @@ label
     </div>
     <div class="row">
     	<div class="col-lg-12">
-        <h1 style="text-align:center"><a href="converter/table" target="_BLANK">Click here to view the names of the currencies corresponding to each code</a></h1>
+        <h1 style="text-align:center"><a href="table" target="_BLANK">Click here to view the names of the currencies corresponding to each code</a></h1>
         </div>
     </div>
 </div>
