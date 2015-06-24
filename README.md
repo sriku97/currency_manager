@@ -72,7 +72,7 @@ List of server routes
 **/graph** - Page for viewing the graph  
 **/table** - Pages for viewing the list of currency codes and their names  
 **/checkcurrentrate/{code}** - This is for processing input in the current_rates page. Called through an ajax request  
-**/convertvalue/{cur1}/{cur2}/{val}** - This is for processing input in the converter application. Called through an ajax request.  
+**/convertvalue/{cur1}/{cur2}/{input}** - This is for processing input in the converter application. Called through an ajax request.  
 **/drawgraph/{curr}/{bardata}** - This is for adding values to the graph. Called through an ajax request.
 
 Libraries and Extensions used
